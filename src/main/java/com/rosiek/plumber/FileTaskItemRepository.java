@@ -1,43 +1,71 @@
 package com.rosiek.plumber;
 
-import com.google.common.collect.Lists;
-
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.LineNumberReader;
+
 import java.util.List;
 
-public class FileTaskItemRepository extends SimpleTaskItemRepository {
+import com.google.common.collect.Lists;
+
+public class FileTaskItemRepository implements TaskItemRepository {
+
+    private static final int LINE_SEPARATOR_SIZE = System.lineSeparator().length();
 
     @Override
-    public List<TaskItem<?>> readItems(Task<?> task, int limit) {
-        List<TaskItem<?>> taskItems = super.readItems(task, limit);
+    public List<TaskItem<?>> readItems(final Task<?> task, final int limit) {
 
-        try (LineNumberReader reader = new LineNumberReader(new FileReader((String)task.getPayload()))) {
+        final FileTaskPayload payload = (FileTaskPayload) task.getPayload();
+        final List<TaskItem<?>> taskItems = Lists.newArrayList();
+        try(final LineNumberReader reader = new LineNumberReader(new FileReader(payload.getFile()))) {
+            long charsProcessed = 0;
 
             boolean first = true;
-            for (TaskItem<?> taskItem : taskItems) {
-                FileItem fileItem = (FileItem) taskItem.getPayload();
+            for (int i = 0; i < limit; i++) {
                 if (first) {
-                    for (int i = 0 ; i < fileItem.getBegin(); i++) {
-                        reader.readLine();
-                    }
+                    reader.skip(payload.getCharsProcessed());
                     first = false;
                 }
-                List<String> lines = Lists.newArrayList();
-                for (int i = fileItem.getBegin() ; i < fileItem.getEnd(); i++) {
-                    String line = reader.readLine();
-                    if (line != null) {
-                        lines.add(line);
-                    }
+
+                final String line = reader.readLine();
+                if (line != null) {
+                    charsProcessed += line.length();
+
+                    final TaskItem<?> taskItem = new FileTaskItem(line);
+                    taskItems.add(taskItem);
                 }
-                fileItem.setContents(lines);
             }
+
+            payload.setCharsProcessed(payload.getCharsProcessed() + charsProcessed
+                    + taskItems.size() * LINE_SEPARATOR_SIZE);
         } catch (IOException e) {
             throw new RuntimeException(String.format("Error while reading file to process task: %s", task), e);
         }
 
         return taskItems;
+    }
+
+    @Override
+    public boolean hasMoreItems(final Task<?> task) {
+        final FileTaskPayload payload = (FileTaskPayload) task.getPayload();
+        try(final LineNumberReader reader = new LineNumberReader(new FileReader(payload.getFile()))) {
+            reader.skip(payload.getCharsProcessed());
+
+            final String line = reader.readLine();
+            return (line != null && !line.isEmpty()) || reader.read() >= 0;
+        } catch (IOException e) {
+            throw new RuntimeException(String.format("Error while reading file to process task: %s", task), e);
+        }
+    }
+
+    @Override
+    public void removeItems(final Task<?> task) {
+        throw new UnsupportedOperationException("Removing items is not yet implemented");
+    }
+
+    @Override
+    public void add(final Task<?> task, final List<TaskItem<?>> taskItems) {
+        throw new UnsupportedOperationException("Adding items is not yet implemented");
     }
 
 }

@@ -10,4 +10,5 @@ public interface  TaskRepository {
 
     void add(Task task);
 
+    void saveProgress(Task<?> task);
 }

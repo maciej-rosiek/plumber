@@ -1,12 +1,11 @@
 package com.rosiek.plumber;
 
-import com.google.common.collect.Lists;
+import java.io.IOException;
+
+import java.util.List;
+
 import org.junit.Before;
 import org.junit.Test;
-
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.util.List;
 
 public class TaskProcessingServiceTest {
 
@@ -16,23 +15,21 @@ public class TaskProcessingServiceTest {
 
     @Before
     public void setUp() {
-        TaskRepository taskRepository = new SimpleTaskRepository();
-        TaskItemRepository taskItemRepository = new FileTaskItemRepository();
+        final TaskRepository taskRepository = new SimpleTaskRepository();
+        final TaskItemRepository taskItemRepository = new FileTaskItemRepository();
 
-        TaskProcessor taskProcessor = new TaskProcessor() {
+        final TaskProcessor taskProcessor = new TaskProcessor() {
             @Override
-            public void processItems(Task<?> task, List<TaskItem<?>> taskItems) {
-                System.out.println(String.format("Processing task: [%s], items: [%s]", task, taskItems != null ? taskItems.size() : 0));
-                if (taskItems != null) {
-                    for (TaskItem<?> taskItem : taskItems) {
-                        FileItem fileItem = (FileItem) taskItem.getPayload();
-                        System.out.println("  - " + fileItem.getContents().size());
-                    }
+            public void processItems(final Task<?> task, final List<TaskItem<?>> taskItems) {
+                System.out.println(String.format("Processing task: [%s], items: [%s]", task,
+                        taskItems != null ? taskItems.size() : 0));
+                for (final TaskItem<?> taskItem : taskItems) {
+                    System.out.println("  - " + taskItem.getPayload());
                 }
             }
 
             @Override
-            public void completeTask(Task<?> task) {
+            public void completeTask(final Task<?> task) {
                 System.out.println(String.format("Finished task: [%s]", task));
             }
         };
@@ -41,33 +38,15 @@ public class TaskProcessingServiceTest {
 
     @Test
     public void test() throws IOException {
-        int chunks = 10;
-        int linesPerChunk = 10000;
-        Task<?> task = new FileTask(FILE);
+        final Task<?> task = new FileTask(new FileTaskPayload(FILE));
         System.out.println("Importing file chunks into queue");
 
         System.out.println("Counting lines in file");
-        int numberOfLines = 0;
-        try (FileInputStream stream = new FileInputStream(FILE)) {
-            byte[] buffer = new byte[8192];
-            int n;
-            while ((n = stream.read(buffer)) > 0) {
-                for (int i = 0; i < n; i++) {
-                    if (buffer[i] == '\n') numberOfLines++;
-                }
-            }
-        }
 
-        System.out.printf("Calculated number of lines: %d%n", numberOfLines);
-        List<TaskItem<?>> items = Lists.newArrayList();
-        for (int i = 0; i < numberOfLines; i += linesPerChunk) {
-            items.add(new FileTaskItem(new FileItem(i, i + linesPerChunk)));
-        }
-        System.out.printf("Imported %d items%n", items.size());
-        taskProcessingService.add(task, items);
+        taskProcessingService.add(task, null);
 
         System.out.println("Starting to process task");
-        while (taskProcessingService.process(chunks)) ;
+        while (taskProcessingService.process(5)) { }
     }
 
 }

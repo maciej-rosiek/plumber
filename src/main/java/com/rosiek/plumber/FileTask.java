@@ -1,22 +1,21 @@
 package com.rosiek.plumber;
 
-public class FileTask implements Task<String> {
+public class FileTask implements Task<FileTaskPayload> {
 
-    private final String file;
+    private final FileTaskPayload payload;
 
-    public FileTask(String file) {
-        this.file = file;
+    public FileTask(final FileTaskPayload payload) {
+        this.payload = payload;
     }
 
     @Override
-    public String getPayload() {
-        return file;
+    public FileTaskPayload getPayload() {
+        return payload;
     }
 
     @Override
     public String toString() {
-        return "FileTask{" +
-                "file='" + file + '\'' +
-                '}';
+        return "FileTask{" + "payload='" + payload + '\'' + '}';
     }
+
 }

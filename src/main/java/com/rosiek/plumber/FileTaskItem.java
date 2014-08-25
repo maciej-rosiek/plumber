@@ -1,22 +1,21 @@
 package com.rosiek.plumber;
 
-public class FileTaskItem implements TaskItem<FileItem> {
+public class FileTaskItem implements TaskItem<String> {
 
-    private FileItem payload;
+    private String line;
 
-    public FileTaskItem(FileItem payload) {
-        this.payload = payload;
+    public FileTaskItem(final String line) {
+        this.line = line;
     }
 
     @Override
-    public FileItem getPayload() {
-        return payload;
+    public String getPayload() {
+        return line;
     }
 
     @Override
     public String toString() {
-        return "FileTaskItem{" +
-                "payload=" + payload +
-                '}';
+        return "FileTaskItem{" + "line='" + line + '\'' + '}';
     }
+
 }
