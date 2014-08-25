@@ -38,6 +38,7 @@ public class FileTaskItemRepository implements TaskItemRepository {
 
             payload.setCharsProcessed(payload.getCharsProcessed() + charsProcessed
                     + taskItems.size() * LINE_SEPARATOR_SIZE);
+            payload.setLinesProcessed(payload.getLinesProcessed() + taskItems.size());
         } catch (IOException e) {
             throw new RuntimeException(String.format("Error while reading file to process task: %s", task), e);
         }

@@ -11,7 +11,7 @@ public class TaskProcessingServiceTest {
 
     private TaskProcessingService taskProcessingService;
 
-    private static final String FILE = "/data/file2.txt";
+    private static final String FILE = "/data/file.txt";
 
     @Before
     public void setUp() {
@@ -21,11 +21,8 @@ public class TaskProcessingServiceTest {
         final TaskProcessor taskProcessor = new TaskProcessor() {
             @Override
             public void processItems(final Task<?> task, final List<TaskItem<?>> taskItems) {
-                System.out.println(String.format("Processing task: [%s], items: [%s]", task,
+                System.out.print(String.format("Processing task: [%s], items: [%s]", task,
                         taskItems != null ? taskItems.size() : 0));
-                for (final TaskItem<?> taskItem : taskItems) {
-                    System.out.println("  - " + taskItem.getPayload());
-                }
             }
 
             @Override
@@ -46,7 +43,14 @@ public class TaskProcessingServiceTest {
         taskProcessingService.add(task, null);
 
         System.out.println("Starting to process task");
-        while (taskProcessingService.process(5)) { }
+
+        long time = System.currentTimeMillis();
+        while (taskProcessingService.process(1000000)) {
+            System.out.println(" - time: " + (System.currentTimeMillis() - time) + " ms");
+            time = System.currentTimeMillis();
+        }
+
+        System.out.println(" - time: " + (System.currentTimeMillis() - time) + " ms");
     }
 
 }
