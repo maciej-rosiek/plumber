@@ -8,15 +8,15 @@ import java.util.List;
 
 import com.google.common.collect.Lists;
 
-public class FileTaskItemRepository implements TaskItemRepository {
+public class FileTaskItemRepository implements TaskItemRepository<FileTask, FileTaskItem> {
 
     private static final int LINE_SEPARATOR_SIZE = System.lineSeparator().length();
 
     @Override
-    public List<TaskItem<?>> readItems(final Task<?> task, final int limit) {
+    public List<FileTaskItem> readItems(final FileTask task, final int limit) {
 
-        final FileTaskPayload payload = (FileTaskPayload) task.getPayload();
-        final List<TaskItem<?>> taskItems = Lists.newArrayList();
+        final FileTaskPayload payload = task.getPayload();
+        final List<FileTaskItem> taskItems = Lists.newArrayList();
         try(final LineNumberReader reader = new LineNumberReader(new FileReader(payload.getFile()))) {
             long charsProcessed = 0;
 
@@ -31,7 +31,7 @@ public class FileTaskItemRepository implements TaskItemRepository {
                 if (line != null) {
                     charsProcessed += line.length();
 
-                    final TaskItem<?> taskItem = new FileTaskItem(line);
+                    final FileTaskItem taskItem = new FileTaskItem(line);
                     taskItems.add(taskItem);
                 }
             }
@@ -47,8 +47,8 @@ public class FileTaskItemRepository implements TaskItemRepository {
     }
 
     @Override
-    public boolean hasMoreItems(final Task<?> task) {
-        final FileTaskPayload payload = (FileTaskPayload) task.getPayload();
+    public boolean hasMoreItems(final FileTask task) {
+        final FileTaskPayload payload = task.getPayload();
         try(final LineNumberReader reader = new LineNumberReader(new FileReader(payload.getFile()))) {
             reader.skip(payload.getCharsProcessed());
 
@@ -60,13 +60,13 @@ public class FileTaskItemRepository implements TaskItemRepository {
     }
 
     @Override
-    public void removeItems(final Task<?> task) {
-        throw new UnsupportedOperationException("Removing items is not yet implemented");
+    public void removeItems(final FileTask task) {
+        throw new UnsupportedOperationException("Removing items is not supported");
     }
 
     @Override
-    public void add(final Task<?> task, final List<TaskItem<?>> taskItems) {
-        throw new UnsupportedOperationException("Adding items is not yet implemented");
+    public void add(final FileTask task, final List<FileTaskItem> taskItems) {
+        throw new UnsupportedOperationException("Adding items is not supported");
     }
 
 }

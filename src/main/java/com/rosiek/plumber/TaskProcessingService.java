@@ -9,9 +9,10 @@ public class TaskProcessingService {
     private static final Logger LOG = LoggerFactory.getLogger(TaskProcessingService.class);
 
     private final TaskRepository taskRepository;
-    private final TaskItemRepository taskItemRepository;
-    private final TaskProcessor taskProcessor;
+    private final TaskItemRepository<Task<?>, TaskItem<?>> taskItemRepository;
+    private final TaskProcessor<Task<?>, TaskItem<?>> taskProcessor;
 
+    @SuppressWarnings("unchecked")
     public TaskProcessingService(final TaskRepository taskRepository, final TaskItemRepository taskItemRepository,
             final TaskProcessor taskProcessor) {
         this.taskRepository = taskRepository;
@@ -27,18 +28,25 @@ public class TaskProcessingService {
         taskRepository.add(task);
     }
 
-    public boolean process(final int limit) {
-        final Task<?> task = taskRepository.getTask();
-        try {
-            final List<TaskItem<?>> taskItems = fetch(limit, task);
-            process(task, taskItems);
-            return write(task);
-        } catch (Throwable ex) {
-            LOG.error("Error while processing task: %s", task, ex);
-            taskRepository.failTask(task, ex);
-            taskItemRepository.removeItems(task);
-            return true;
+    public Task<?> process(final int limit) {
+        if (!taskRepository.hasMoreTasks()) {
+            LOG.info("No tasks available for processing.");
+            return null;
+        } else {
+            final Task<?> task = taskRepository.getTask();
+            try {
+                final List<TaskItem<?>> taskItems = fetch(limit, task);
+                process(task, taskItems);
+                write(task);
+            } catch (Throwable ex) {
+                LOG.error("Error while processing task: %s", task, ex);
+                taskRepository.failTask(task, ex);
+                taskItemRepository.removeItems(task);
+            }
+
+            return task;
         }
+
     }
 
     private void process(final Task<?> task, final List<TaskItem<?>> taskItems) {
@@ -49,14 +57,11 @@ public class TaskProcessingService {
         return taskItemRepository.readItems(task, limit);
     }
 
-    private boolean write(final Task<?> task) {
+    private void write(final Task<?> task) {
         taskRepository.saveProgress(task);
         if (!taskItemRepository.hasMoreItems(task)) {
             taskRepository.completeTask(task);
             taskProcessor.completeTask(task);
-            return false;
         }
-
-        return true;
     }
 }

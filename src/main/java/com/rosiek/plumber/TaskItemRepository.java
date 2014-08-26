@@ -2,14 +2,14 @@ package com.rosiek.plumber;
 
 import java.util.List;
 
-public interface TaskItemRepository {
+public interface TaskItemRepository<TaskType extends Task<?>, TaskItemType extends TaskItem<?>> {
 
-    List<TaskItem<?>> readItems(Task<?> task, int limit);
+    List<TaskItemType> readItems(TaskType task, int limit);
 
-    boolean hasMoreItems(Task<?> task);
+    boolean hasMoreItems(TaskType task);
 
-    void removeItems(Task<?> task);
+    void removeItems(TaskType task);
 
-    void add(Task<?> task, List<TaskItem<?>> taskItems);
+    void add(TaskType task, List<TaskItemType> taskItems);
 
 }

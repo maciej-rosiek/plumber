@@ -14,10 +14,6 @@ public class FileTaskPayload {
         return file;
     }
 
-    public void setFile(final String file) {
-        this.file = file;
-    }
-
     public long getCharsProcessed() {
         return charsProcessed;
     }

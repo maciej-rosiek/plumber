@@ -7,7 +7,7 @@ import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 
-public class SimpleTaskItemRepository implements TaskItemRepository {
+public class SimpleTaskItemRepository implements TaskItemRepository<Task<?>, TaskItem<?>> {
 
     private Map<Task<?>, List<TaskItem<?>>> items = Maps.newHashMap();
 

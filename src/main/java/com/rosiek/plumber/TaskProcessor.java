@@ -2,10 +2,10 @@ package com.rosiek.plumber;
 
 import java.util.List;
 
-public interface TaskProcessor {
+public interface TaskProcessor<TaskType extends Task<?>, TaskItemType extends TaskItem<?>> {
 
-    void processItems(Task<?> task, List<TaskItem<?>> taskItems);
+    void processItems(TaskType task, List<TaskItemType> taskItems);
 
-    void completeTask(Task<?> task);
+    void completeTask(TaskType task);
 
 }

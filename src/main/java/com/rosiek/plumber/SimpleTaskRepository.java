@@ -12,6 +12,11 @@ public class SimpleTaskRepository implements TaskRepository {
     }
 
     @Override
+    public boolean hasMoreTasks() {
+        return !tasks.isEmpty();
+    }
+
+    @Override
     public void completeTask(final Task task) {
         tasks.remove();
     }

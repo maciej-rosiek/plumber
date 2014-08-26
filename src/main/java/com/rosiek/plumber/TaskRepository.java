@@ -4,6 +4,8 @@ public interface  TaskRepository {
 
     Task getTask();
 
+    boolean hasMoreTasks();
+
     void completeTask(Task task);
 
     void failTask(Task task, Throwable ex);
